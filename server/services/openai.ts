@@ -15,6 +15,12 @@ export interface ProductRecommendation {
   productId: string;
   reason: string;
   confidence: number;
+  product?: {
+    name: string;
+    price: string;
+    image: string;
+    description: string;
+  };
 }
 
 export interface ChatbotResponse {

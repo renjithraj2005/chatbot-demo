@@ -176,12 +176,24 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
                   
                   {/* Show recommendations if available */}
                   {message.recommendations && message.recommendations.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      <p className="text-xs font-medium">Recommended:</p>
+                    <div className="mt-3 space-y-2">
+                      <p className="text-xs font-medium">Recommended products:</p>
                       {message.recommendations.slice(0, 2).map((rec, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {rec.reason}
-                        </Badge>
+                        <div key={i} className="flex space-x-2 p-2 bg-muted/50 rounded-lg hover:bg-muted/70 cursor-pointer transition-colors"
+                             onClick={() => rec.productId && handleQuickAction(`Show me ${rec.product?.name}`)}>
+                          {rec.product?.image && (
+                            <img 
+                              src={rec.product.image} 
+                              alt={rec.product.name}
+                              className="w-12 h-12 object-cover rounded flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{rec.product?.name}</p>
+                            <p className="text-xs text-success font-semibold">${rec.product?.price}</p>
+                            <p className="text-xs text-neutral mt-1">{rec.reason}</p>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}

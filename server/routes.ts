@@ -200,10 +200,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Enhance recommendations with full product details
+      const enhancedRecommendations = (response.recommendations || []).map(rec => {
+        const product = products.find(p => p.id === rec.productId);
+        return {
+          ...rec,
+          product: product ? {
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            description: product.description
+          } : undefined
+        };
+      });
+
       res.json({
         conversationId: conversation.id,
         response: response.message,
-        recommendations: response.recommendations || [],
+        recommendations: enhancedRecommendations,
         actionType: response.actionType,
         quickActions: response.quickActions || []
       });
