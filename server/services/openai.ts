@@ -48,11 +48,13 @@ Your role:
 
 Always respond in a helpful, professional tone that reflects the premium brand positioning. If asked about products not in the catalog, politely redirect to available options.
 
+When recommending products, use the exact Product ID from the available products list.
+
 Respond with JSON in this format:
 {
   "message": "your response message",
   "actionType": "product_search|order_status|size_guide|faq|general",
-  "recommendations": [{"productId": "id", "reason": "why recommended", "confidence": 0.8}],
+  "recommendations": [{"productId": "exact-uuid-from-products-list", "reason": "why recommended", "confidence": 0.8}],
   "quickActions": ["optional array of quick action suggestions"]
 }`;
 
@@ -74,13 +76,13 @@ Respond with JSON in this format:
 
       // Add product context if relevant
       const productContext = availableProducts.map(p => 
-        `${p.name} (${p.category}, ${p.gender}): ${p.description} - $${p.price}`
+        `Product ID: ${p.id}\nName: ${p.name}\nCategory: ${p.category}\nGender: ${p.gender}\nPrice: $${p.price}\nDescription: ${p.description}\n---`
       ).join('\n');
 
       if (availableProducts.length > 0) {
         messages.splice(1, 0, {
           role: "system" as const,
-          content: `Available products:\n${productContext}`
+          content: `Available products (use exact Product ID in recommendations):\n${productContext}\n\nIMPORTANT: When making recommendations, use the exact Product ID from above.`
         });
       }
 

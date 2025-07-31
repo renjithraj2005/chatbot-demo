@@ -202,7 +202,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Enhance recommendations with full product details
       const enhancedRecommendations = (response.recommendations || []).map(rec => {
-        const product = products.find(p => p.id === rec.productId);
+        // Try to find by ID first, then by name match
+        let product = products.find(p => p.id === rec.productId);
+        if (!product) {
+          // If not found by ID, try to match by name (case insensitive)
+          const searchName = rec.productId.toLowerCase();
+          product = products.find(p => 
+            p.name.toLowerCase().includes(searchName.split(' - ')[0].toLowerCase()) ||
+            searchName.includes(p.name.toLowerCase())
+          );
+        }
+        console.log(`Looking for product: ${rec.productId}, found: ${product ? product.name : 'NOT FOUND'}`);
         return {
           ...rec,
           product: product ? {
