@@ -1,0 +1,167 @@
+import OpenAI from "openai";
+
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key"
+});
+
+export interface ChatMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp?: Date;
+}
+
+export interface ProductRecommendation {
+  productId: string;
+  reason: string;
+  confidence: number;
+}
+
+export interface ChatbotResponse {
+  message: string;
+  recommendations?: ProductRecommendation[];
+  actionType?: "product_search" | "order_status" | "size_guide" | "faq" | "general";
+  quickActions?: string[];
+}
+
+export class ChatbotService {
+  private systemPrompt = `You are a helpful AI shopping assistant for DL1961, a premium sustainable denim brand. 
+
+Key brand information:
+- DL1961 specializes in premium, sustainable denim using 89% less water in production
+- Products include jeans, jackets, and casual wear for men, women, and kids
+- Focus on comfort, fit, and eco-conscious design
+- Vertical integration from fiber to finished product
+
+Your role:
+- Help customers find the perfect jeans and clothing
+- Provide product recommendations based on their needs
+- Answer questions about sizing, sustainability, care instructions
+- Assist with order tracking and returns
+- Be friendly, knowledgeable, and focused on sustainability
+
+Always respond in a helpful, professional tone that reflects the premium brand positioning. If asked about products not in the catalog, politely redirect to available options.
+
+Respond with JSON in this format:
+{
+  "message": "your response message",
+  "actionType": "product_search|order_status|size_guide|faq|general",
+  "recommendations": [{"productId": "id", "reason": "why recommended", "confidence": 0.8}],
+  "quickActions": ["optional array of quick action suggestions"]
+}`;
+
+  async processMessage(
+    message: string, 
+    conversationHistory: ChatMessage[],
+    availableProducts: any[]
+  ): Promise<ChatbotResponse> {
+    try {
+      const messages = [
+        { role: "system" as const, content: this.systemPrompt },
+        ...conversationHistory.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        { role: "user" as const, content: message }
+      ];
+
+      // Add product context if relevant
+      const productContext = availableProducts.map(p => 
+        `${p.name} (${p.category}, ${p.gender}): ${p.description} - $${p.price}`
+      ).join('\n');
+
+      if (availableProducts.length > 0) {
+        messages.splice(1, 0, {
+          role: "system" as const,
+          content: `Available products:\n${productContext}`
+        });
+      }
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages,
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 500
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      
+      return {
+        message: result.message || "I'm here to help with your DL1961 shopping needs!",
+        actionType: result.actionType || "general",
+        recommendations: result.recommendations || [],
+        quickActions: result.quickActions || []
+      };
+    } catch (error) {
+      console.error("OpenAI API error:", error);
+      return {
+        message: "I apologize, but I'm having trouble processing your request right now. Please try again or contact our customer service team.",
+        actionType: "general"
+      };
+    }
+  }
+
+  async generateProductRecommendations(
+    userPreferences: {
+      gender?: string;
+      category?: string;
+      style?: string;
+      size?: string;
+      priceRange?: string;
+    },
+    products: any[]
+  ): Promise<ProductRecommendation[]> {
+    try {
+      const prompt = `Based on these user preferences: ${JSON.stringify(userPreferences)}, 
+      recommend the best products from this catalog: ${JSON.stringify(products)}.
+      
+      Respond with JSON array of recommendations:
+      [{"productId": "id", "reason": "explanation", "confidence": 0-1}]`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: "You are a product recommendation engine for DL1961 denim." },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.3
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{"recommendations": []}');
+      return result.recommendations || [];
+    } catch (error) {
+      console.error("Recommendation generation error:", error);
+      return [];
+    }
+  }
+
+  async analyzeSentiment(message: string): Promise<{ sentiment: string; confidence: number }> {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "Analyze the sentiment of customer messages. Respond with JSON: {\"sentiment\": \"positive|negative|neutral\", \"confidence\": 0.0-1.0}"
+          },
+          { role: "user", content: message }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.1
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{}');
+      return {
+        sentiment: result.sentiment || "neutral",
+        confidence: result.confidence || 0.5
+      };
+    } catch (error) {
+      console.error("Sentiment analysis error:", error);
+      return { sentiment: "neutral", confidence: 0.5 };
+    }
+  }
+}
+
+export const chatbotService = new ChatbotService();
