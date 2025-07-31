@@ -135,8 +135,8 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      <Card className="w-80 h-96 flex flex-col shadow-2xl animate-fade-in">
-        <CardHeader className="bg-primary text-white p-4 rounded-t-lg flex flex-row items-center justify-between space-y-0">
+      <Card className="w-80 h-[520px] flex flex-col shadow-2xl animate-fade-in border-0">
+        <CardHeader className="bg-primary text-white p-4 rounded-t-lg flex flex-row items-center justify-between space-y-0 flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
               <Bot className="h-4 w-4 text-white" />
@@ -156,9 +156,9 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
           </Button>
         </CardHeader>
         
-        <CardContent className="flex-1 flex flex-col p-0">
+        <CardContent className="flex-1 flex flex-col p-0 min-h-0">
           {/* Messages */}
-          <div className="flex-1 p-4 overflow-y-auto chat-scrollbar space-y-3">
+          <div className="flex-1 p-4 overflow-y-auto space-y-3 min-h-0 chatbot-scroll">
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'items-start'}`}>
                 {message.role === 'assistant' && (
@@ -233,7 +233,7 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
           
           {/* Quick Actions */}
           {messages.length <= 1 && !chatMutation.isPending && (
-            <div className="p-3 border-t border-border">
+            <div className="p-3 border-t border-border flex-shrink-0">
               <p className="text-xs text-neutral mb-2">Quick actions:</p>
               <div className="grid grid-cols-2 gap-2">
                 {quickActions.map((action, index) => (
@@ -253,7 +253,7 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
           )}
           
           {/* Input */}
-          <div className="p-3 border-t border-border">
+          <div className="p-3 border-t border-border flex-shrink-0">
             <div className="flex space-x-2">
               <Input
                 placeholder="Type your message..."
