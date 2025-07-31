@@ -42,28 +42,40 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
-      const response = await apiRequest("POST", "/api/chat", {
-        message,
-        conversationId
-      });
-      return response.json();
+      try {
+        const response = await apiRequest("POST", "/api/chat", {
+          message,
+          conversationId
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Chat API error:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
-      if (!conversationId) {
+      if (!conversationId && data.conversationId) {
         setConversationId(data.conversationId);
       }
       
       const assistantMessage: ChatMessage = {
         role: "assistant",
-        content: data.response,
+        content: data.response || "I'm sorry, I couldn't process that request.",
         timestamp: new Date(),
-        recommendations: data.recommendations,
-        quickActions: data.quickActions
+        recommendations: data.recommendations || [],
+        quickActions: data.quickActions || []
       };
       
       setMessages(prev => [...prev, assistantMessage]);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Chat error:", error);
       const errorMessage: ChatMessage = {
         role: "assistant",
         content: "I apologize, but I'm having trouble right now. Please try again in a moment.",
@@ -88,6 +100,8 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
   };
 
   const handleQuickAction = (action: string) => {
+    if (chatMutation.isPending) return;
+    
     const userMessage: ChatMessage = {
       role: "user",
       content: action,
@@ -182,6 +196,7 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
                           variant="outline"
                           className="text-xs h-6 px-2"
                           onClick={() => handleQuickAction(action)}
+                          disabled={chatMutation.isPending}
                         >
                           {action}
                         </Button>
@@ -217,9 +232,10 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
           </div>
           
           {/* Quick Actions */}
-          {messages.length <= 1 && (
+          {messages.length <= 1 && !chatMutation.isPending && (
             <div className="p-3 border-t border-border">
-              <div className="grid grid-cols-2 gap-2 mb-3">
+              <p className="text-xs text-neutral mb-2">Quick actions:</p>
+              <div className="grid grid-cols-2 gap-2">
                 {quickActions.map((action, index) => (
                   <Button
                     key={index}
@@ -243,7 +259,12 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
                 placeholder="Type your message..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
                 disabled={chatMutation.isPending}
                 className="flex-1 text-sm"
               />
