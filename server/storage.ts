@@ -71,6 +71,9 @@ export class MemStorage implements IStorage {
 
     // Initialize sample products
     this.initializeProducts();
+
+    // Initialize sample orders for demo
+    this.initializeSampleOrders();
   }
 
   private initializeProducts() {
@@ -82,7 +85,7 @@ export class MemStorage implements IStorage {
         price: "179.00",
         category: "jeans",
         gender: "women",
-        image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1200",
+        image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&h=600&fit=crop",
         sizes: ["24", "25", "26", "27", "28", "29", "30", "31"],
         colors: ["Dark Wash", "Medium Wash", "Light Wash"],
         inStock: true,
@@ -97,7 +100,7 @@ export class MemStorage implements IStorage {
         price: "208.00",
         category: "jeans",
         gender: "men",
-        image: "https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1200",
+        image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=600&fit=crop",
         sizes: ["30", "31", "32", "33", "34", "36", "38"],
         colors: ["Indigo", "Dark Blue", "Black"],
         inStock: true,
@@ -112,7 +115,7 @@ export class MemStorage implements IStorage {
         price: "248.00",
         category: "jackets",
         gender: "unisex",
-        image: "https://pixabay.com/get/g29d69293ec1bb5cc590e95fc32c0f5a9d8b29f6d1a197f3bde2ce6a1fc3c8a5f860251968c919e435ad23ded5c6da9f2facbb63dcc4deae93c3ee5e47067691c_1280.jpg",
+        image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=600&fit=crop",
         sizes: ["XS", "S", "M", "L", "XL", "XXL"],
         colors: ["Classic Blue", "Black", "White"],
         inStock: true,
@@ -127,7 +130,7 @@ export class MemStorage implements IStorage {
         price: "188.00",
         category: "jeans",
         gender: "women",
-        image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1200",
+        image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&h=600&fit=crop",
         sizes: ["24", "25", "26", "27", "28", "29", "30"],
         colors: ["Light Wash", "Medium Wash", "White"],
         inStock: true,
@@ -142,7 +145,7 @@ export class MemStorage implements IStorage {
         price: "199.00",
         category: "jeans",
         gender: "men",
-        image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1200",
+        image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=600&fit=crop",
         sizes: ["30", "31", "32", "33", "34", "36"],
         colors: ["Black", "Dark Grey", "Navy"],
         inStock: true,
@@ -157,7 +160,7 @@ export class MemStorage implements IStorage {
         price: "69.00",
         category: "jeans",
         gender: "kids",
-        image: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1200",
+        image: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=400&h=600&fit=crop",
         sizes: ["4", "6", "8", "10", "12", "14"],
         colors: ["Medium Wash", "Light Wash", "Dark Wash"],
         inStock: true,
@@ -172,7 +175,7 @@ export class MemStorage implements IStorage {
         price: "179.00",
         category: "jeans",
         gender: "women",
-        image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1200",
+        image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=400&h=600&fit=crop",
         sizes: ["24", "25", "26", "27", "28", "29", "30", "31"],
         colors: ["Light Wash", "Medium Wash", "Dark Wash"],
         inStock: true,
@@ -187,7 +190,7 @@ export class MemStorage implements IStorage {
         price: "189.00",
         category: "jeans",
         gender: "men",
-        image: "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1200",
+        image: "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=400&h=600&fit=crop",
         sizes: ["28", "29", "30", "31", "32", "33", "34", "36"],
         colors: ["Dark Blue", "Black", "Indigo"],
         inStock: true,
@@ -202,7 +205,7 @@ export class MemStorage implements IStorage {
         price: "248.00",
         category: "jackets",
         gender: "unisex",
-        image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1200",
+        image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=600&fit=crop",
         sizes: ["XS", "S", "M", "L", "XL", "XXL"],
         colors: ["Indigo", "Black", "Light Wash"],
         inStock: true,
@@ -217,7 +220,7 @@ export class MemStorage implements IStorage {
         price: "59.00",
         category: "jeans",
         gender: "kids",
-        image: "https://images.unsplash.com/photo-1604176354204-9268737828e4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=1200",
+        image: "https://images.unsplash.com/photo-1604176354204-9268737828e4?w=400&h=600&fit=crop",
         sizes: ["4", "6", "8", "10", "12", "14", "16", "18"],
         colors: ["Navy", "Black", "Indigo"],
         inStock: true,
@@ -229,6 +232,111 @@ export class MemStorage implements IStorage {
 
     sampleProducts.forEach(product => {
       this.products.set(product.id, product);
+    });
+  }
+
+  private initializeSampleOrders() {
+    // Get some product IDs for sample orders
+    const productIds = Array.from(this.products.keys());
+    const demoSessionId = "demo-session-12345"; // Fixed session ID for demo
+
+    const sampleOrders: Order[] = [
+      {
+        id: randomUUID(),
+        sessionId: demoSessionId,
+        status: "delivered",
+        total: "179.00",
+        items: [{
+          id: randomUUID(),
+          sessionId: demoSessionId,
+          productId: productIds[0], // Florence Skinny
+          quantity: 1,
+          size: "27",
+          color: "Dark Wash",
+          createdAt: new Date("2025-01-15")
+        }],
+        shippingAddress: {
+          name: "Demo Customer",
+          address: "123 Fashion Street",
+          city: "New York",
+          state: "NY",
+          zipCode: "10001",
+          phone: "+1-555-0123"
+        },
+        paymentMethod: "cod",
+        codAmount: "179.00",
+        createdAt: new Date("2025-01-15"),
+        updatedAt: new Date("2025-01-22")
+      },
+      {
+        id: randomUUID(),
+        sessionId: demoSessionId,
+        status: "shipped",
+        total: "248.00",
+        items: [{
+          id: randomUUID(),
+          sessionId: demoSessionId,
+          productId: productIds[5], // Classic Denim Jacket
+          quantity: 1,
+          size: "M",
+          color: "Indigo",
+          createdAt: new Date("2025-01-25")
+        }],
+        shippingAddress: {
+          name: "Demo Customer",
+          address: "123 Fashion Street",
+          city: "New York",
+          state: "NY",
+          zipCode: "10001",
+          phone: "+1-555-0123"
+        },
+        paymentMethod: "cod",
+        codAmount: "248.00",
+        createdAt: new Date("2025-01-25"),
+        updatedAt: new Date("2025-01-29")
+      },
+      {
+        id: randomUUID(),
+        sessionId: demoSessionId,
+        status: "processing",
+        total: "387.00",
+        items: [
+          {
+            id: randomUUID(),
+            sessionId: demoSessionId,
+            productId: productIds[1], // Russell Slim Straight
+            quantity: 1,
+            size: "32",
+            color: "Indigo",
+            createdAt: new Date("2025-01-28")
+          },
+          {
+            id: randomUUID(),
+            sessionId: demoSessionId,
+            productId: productIds[2], // Emma Straight
+            quantity: 1,
+            size: "26",
+            color: "Light Wash",
+            createdAt: new Date("2025-01-28")
+          }
+        ],
+        shippingAddress: {
+          name: "Demo Customer",
+          address: "123 Fashion Street",
+          city: "New York",
+          state: "NY",
+          zipCode: "10001",
+          phone: "+1-555-0123"
+        },
+        paymentMethod: "cod",
+        codAmount: "387.00",
+        createdAt: new Date("2025-01-28"),
+        updatedAt: new Date("2025-01-30")
+      }
+    ];
+
+    sampleOrders.forEach(order => {
+      this.orders.set(order.id, order);
     });
   }
 

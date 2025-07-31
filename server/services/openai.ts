@@ -55,10 +55,13 @@ When user wants to checkout or mentions "ready to buy", "checkout", "purchase":
 4. If they confirm COD, guide them to complete the purchase
 
 ORDER TRACKING:
-When asked about order status:
-- Check their recent orders
+When asked about order status, past orders, or previous purchases:
+- Show their order history with details
 - Provide realistic status updates (pending → processing → shipped → delivered)
+- Include order dates, items purchased, and current status
+- For delivered orders, ask if they want to reorder similar items
 - Orders typically take 2-3 business days to process and 5-7 days for delivery
+- Use actionType: "order_status" for order-related queries
 
 Always respond in a helpful, professional tone that reflects the premium brand positioning. If asked about products not in the catalog, politely redirect to available options.
 
@@ -103,14 +106,22 @@ Respond with JSON in this format:
 
       // Add user order context if they have any orders
       if (userOrders.length > 0) {
-        const orderContext = userOrders.map(order =>
-          `Order #${order.id.slice(0, 8)}: Status: ${order.status}, Total: $${order.total}, Created: ${new Date(order.createdAt).toLocaleDateString()}`
-        ).join('\n');
+        const orderContext = userOrders.map(order => {
+          const itemsText = order.items.map(item => {
+            const productName = item.productName || 'Unknown Product';
+            const productPrice = item.productPrice || '0.00';
+            return `${item.quantity}x ${productName} (${item.size}, ${item.color}) - $${productPrice}`;
+          }).join(', ');
+          return `Order #${order.id.slice(0, 8)}: Status: ${order.status.toUpperCase()}, Total: $${order.total}, Items: ${itemsText}, Date: ${new Date(order.createdAt).toLocaleDateString()}`;
+        }).join('\n\n');
 
-        messages.splice(1, 0, {
+        const orderSystemMessage = {
           role: "system" as const,
-          content: `User's recent orders:\n${orderContext}\n\nWhen asked about orders, show this information directly without asking for email.`
-        });
+          content: `User's complete purchase history:\n${orderContext}\n\nWhen asked about orders, previous purchases, or order history, show this detailed information including product names, sizes, colors, prices, and order status. Use actionType: "order_status" and provide a comprehensive summary with product details.`
+        };
+
+        console.log("Adding order context to OpenAI:", orderSystemMessage.content);
+        messages.splice(1, 0, orderSystemMessage);
       }
 
       // Add cart context if they have items in cart

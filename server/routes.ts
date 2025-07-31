@@ -34,6 +34,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Demo endpoint to get demo orders
+  app.get("/api/demo/orders", async (req, res) => {
+    const demoOrders = await storage.getOrdersBySession("demo-session-12345");
+    const products = await storage.getProducts();
+
+    // Enrich orders with product details
+    const enrichedOrders = demoOrders.map(order => ({
+      ...order,
+      items: order.items.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        return {
+          ...item,
+          product: product ? {
+            name: product.name,
+            price: product.price,
+            image: product.image
+          } : null
+        };
+      })
+    }));
+
+    res.json(enrichedOrders);
+  });
+
   // Products API
   app.get("/api/products", async (req, res) => {
     try {
@@ -188,18 +212,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const products = await storage.getProducts();
 
       // Get user's orders for order tracking context
-      const userOrders = await storage.getOrdersBySession(sessionId);
+      // For demo purposes, if user asks about past orders, use demo session
+      let userOrders = await storage.getOrdersBySession(sessionId);
+      console.log(`User orders for session ${sessionId}: ${userOrders.length}`);
+
+      // If no orders found and user is asking about orders, show demo orders
+      const isOrderQuery = message.toLowerCase().includes('order') ||
+                          message.toLowerCase().includes('previous') ||
+                          message.toLowerCase().includes('past') ||
+                          message.toLowerCase().includes('bought') ||
+                          message.toLowerCase().includes('purchase') ||
+                          message.toLowerCase().includes('history');
+
+      if (userOrders.length === 0 && isOrderQuery) {
+        console.log(`No orders found, checking demo orders for order query: "${message}"`);
+        userOrders = await storage.getOrdersBySession("demo-session-12345");
+        console.log(`Demo orders found: ${userOrders.length}`);
+      }
 
       // Get user's cart for checkout context
       const cartItems = await storage.getCartItems(sessionId);
       console.log(`Chat session ${sessionId} has ${cartItems.length} cart items`);
+
+      // Enrich orders with product details for better context
+      const enrichedOrders = userOrders.map(order => ({
+        ...order,
+        items: order.items.map(item => {
+          const product = products.find(p => p.id === item.productId);
+          return {
+            ...item,
+            productName: product?.name || 'Unknown Product',
+            productPrice: product?.price || '0.00',
+            productImage: product?.image || ''
+          };
+        })
+      }));
 
       // Process message with OpenAI
       const response = await chatbotService.processMessage(
         message,
         conversationHistory,
         products,
-        userOrders,
+        enrichedOrders,
         cartItems
       );
       

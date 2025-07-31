@@ -270,6 +270,9 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
                                 src={rec.product.image}
                                 alt={rec.product.name}
                                 className="w-12 h-12 object-cover rounded flex-shrink-0"
+                                onError={(e) => {
+                                  e.currentTarget.src = `https://via.placeholder.com/400x600/6366f1/ffffff?text=${encodeURIComponent(rec.product?.name?.split(' ')[0] || 'Product')}`;
+                                }}
                               />
                             )}
                             <div className="flex-1 min-w-0">

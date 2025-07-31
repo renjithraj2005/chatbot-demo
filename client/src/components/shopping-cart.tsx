@@ -114,10 +114,13 @@ export default function ShoppingCart({ isOpen, onClose }: ShoppingCartProps) {
             <div className="flex-1 overflow-y-auto space-y-4">
               {cartItems.map((item: any) => (
                 <div key={item.id} className="flex items-center space-x-4 pb-4 border-b border-border">
-                  <img 
-                    src={item.product?.image} 
+                  <img
+                    src={item.product?.image}
                     alt={item.product?.name}
                     className="w-16 h-20 object-cover rounded"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://via.placeholder.com/200x250/6366f1/ffffff?text=${encodeURIComponent(item.product?.name?.split(' ')[0] || 'Product')}`;
+                    }}
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-sm truncate">{item.product?.name}</h4>

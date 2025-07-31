@@ -59,10 +59,13 @@ export default function FeaturedProducts({ onProductSelect }: FeaturedProductsPr
               onClick={() => onProductSelect(product)}
             >
               <div className="aspect-w-3 aspect-h-4 overflow-hidden">
-                <img 
-                  src={product.image} 
+                <img
+                  src={product.image}
                   alt={product.name}
                   className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://via.placeholder.com/400x600/6366f1/ffffff?text=${encodeURIComponent(product.name.split(' ')[0] || 'Product')}`;
+                  }}
                 />
               </div>
               <CardContent className="p-6">

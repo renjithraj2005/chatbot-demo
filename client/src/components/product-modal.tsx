@@ -95,10 +95,13 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
           <div>
-            <img 
-              src={product.image} 
+            <img
+              src={product.image}
               alt={product.name}
               className="w-full rounded-lg object-cover aspect-[3/4]"
+              onError={(e) => {
+                e.currentTarget.src = `https://via.placeholder.com/400x600/6366f1/ffffff?text=${encodeURIComponent(product.name.split(' ')[0] || 'Product')}`;
+              }}
             />
           </div>
           
