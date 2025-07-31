@@ -170,11 +170,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get available products for context
       const products = await storage.getProducts();
       
+      // Get user's orders for order tracking context
+      const userOrders = await storage.getOrdersBySession(sessionId);
+      
       // Process message with OpenAI
       const response = await chatbotService.processMessage(
         message,
         conversationHistory,
-        products
+        products,
+        userOrders
       );
       
       // Update conversation history

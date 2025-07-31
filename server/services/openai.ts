@@ -53,7 +53,8 @@ Respond with JSON in this format:
   async processMessage(
     message: string, 
     conversationHistory: ChatMessage[],
-    availableProducts: any[]
+    availableProducts: any[],
+    userOrders: any[] = []
   ): Promise<ChatbotResponse> {
     try {
       const messages = [
@@ -74,6 +75,18 @@ Respond with JSON in this format:
         messages.splice(1, 0, {
           role: "system" as const,
           content: `Available products:\n${productContext}`
+        });
+      }
+
+      // Add user order context if they have any orders
+      if (userOrders.length > 0) {
+        const orderContext = userOrders.map(order => 
+          `Order #${order.id.slice(0, 8)}: Status: ${order.status}, Total: $${order.total}, Created: ${new Date(order.createdAt).toLocaleDateString()}`
+        ).join('\n');
+        
+        messages.splice(1, 0, {
+          role: "system" as const,
+          content: `User's recent orders:\n${orderContext}\n\nWhen asked about orders, show this information directly without asking for email.`
         });
       }
 
