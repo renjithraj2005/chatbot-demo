@@ -26,12 +26,12 @@ export interface ProductRecommendation {
 export interface ChatbotResponse {
   message: string;
   recommendations?: ProductRecommendation[];
-  actionType?: "product_search" | "order_status" | "size_guide" | "faq" | "general";
+  actionType?: "product_search" | "order_status" | "size_guide" | "faq" | "general" | "checkout" | "cart_review";
   quickActions?: string[];
 }
 
 export class ChatbotService {
-  private systemPrompt = `You are a helpful AI shopping assistant for DL1961, a premium sustainable denim brand. 
+  private systemPrompt = `You are a helpful AI shopping assistant for DL1961, a premium sustainable denim brand.
 
 Key brand information:
 - DL1961 specializes in premium, sustainable denim using 89% less water in production
@@ -44,7 +44,21 @@ Your role:
 - Provide product recommendations based on their needs
 - Answer questions about sizing, sustainability, care instructions
 - Assist with order tracking and returns
+- Handle checkout process with Cash on Delivery (COD) payment
 - Be friendly, knowledgeable, and focused on sustainability
+
+CHECKOUT FLOW:
+When user wants to checkout or mentions "ready to buy", "checkout", "purchase":
+1. Review their cart contents
+2. Confirm they want to proceed with COD payment
+3. Use actionType: "checkout" and provide quickActions: ["Proceed with COD", "Continue Shopping"]
+4. If they confirm COD, guide them to complete the purchase
+
+ORDER TRACKING:
+When asked about order status:
+- Check their recent orders
+- Provide realistic status updates (pending → processing → shipped → delivered)
+- Orders typically take 2-3 business days to process and 5-7 days for delivery
 
 Always respond in a helpful, professional tone that reflects the premium brand positioning. If asked about products not in the catalog, politely redirect to available options.
 
@@ -53,16 +67,17 @@ When recommending products, use the exact Product ID from the available products
 Respond with JSON in this format:
 {
   "message": "your response message",
-  "actionType": "product_search|order_status|size_guide|faq|general",
+  "actionType": "product_search|order_status|size_guide|faq|general|checkout|cart_review",
   "recommendations": [{"productId": "exact-uuid-from-products-list", "reason": "why recommended", "confidence": 0.8}],
   "quickActions": ["optional array of quick action suggestions"]
 }`;
 
   async processMessage(
-    message: string, 
+    message: string,
     conversationHistory: ChatMessage[],
     availableProducts: any[],
-    userOrders: any[] = []
+    userOrders: any[] = [],
+    cartItems: any[] = []
   ): Promise<ChatbotResponse> {
     try {
       const messages = [
@@ -88,13 +103,25 @@ Respond with JSON in this format:
 
       // Add user order context if they have any orders
       if (userOrders.length > 0) {
-        const orderContext = userOrders.map(order => 
+        const orderContext = userOrders.map(order =>
           `Order #${order.id.slice(0, 8)}: Status: ${order.status}, Total: $${order.total}, Created: ${new Date(order.createdAt).toLocaleDateString()}`
         ).join('\n');
-        
+
         messages.splice(1, 0, {
           role: "system" as const,
           content: `User's recent orders:\n${orderContext}\n\nWhen asked about orders, show this information directly without asking for email.`
+        });
+      }
+
+      // Add cart context if they have items in cart
+      if (cartItems.length > 0) {
+        const cartContext = cartItems.map(item =>
+          `Product ID: ${item.productId}, Quantity: ${item.quantity}, Size: ${item.size}, Color: ${item.color}`
+        ).join('\n');
+
+        messages.splice(1, 0, {
+          role: "system" as const,
+          content: `User's current cart:\n${cartContext}\n\nWhen user mentions checkout, buying, or purchasing, help them proceed with COD payment. Use actionType: "checkout" and provide quickActions for COD confirmation.`
         });
       }
 

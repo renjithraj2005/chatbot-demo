@@ -19,6 +19,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // Debug endpoint to check session
+  app.get("/api/debug/session", async (req, res) => {
+    const sessionId = req.headers['x-session-id'] as string;
+    const cartItems = await storage.getCartItems(sessionId);
+    const orders = await storage.getOrdersBySession(sessionId);
+
+    res.json({
+      sessionId,
+      cartItemCount: cartItems.length,
+      cartItems,
+      orderCount: orders.length,
+      orders: orders.map(o => ({ id: o.id.slice(0, 8), status: o.status, total: o.total }))
+    });
+  });
+
   // Products API
   app.get("/api/products", async (req, res) => {
     try {
@@ -64,7 +79,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/cart", async (req, res) => {
     try {
       const sessionId = req.headers['x-session-id'] as string;
+      console.log(`Getting cart for session: ${sessionId}`);
       const cartItems = await storage.getCartItems(sessionId);
+      console.log(`Cart items: ${cartItems.length}`);
       
       // Enrich cart items with product details
       const enrichedItems = await Promise.all(
@@ -169,16 +186,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get available products for context
       const products = await storage.getProducts();
-      
+
       // Get user's orders for order tracking context
       const userOrders = await storage.getOrdersBySession(sessionId);
-      
+
+      // Get user's cart for checkout context
+      const cartItems = await storage.getCartItems(sessionId);
+      console.log(`Chat session ${sessionId} has ${cartItems.length} cart items`);
+
       // Process message with OpenAI
       const response = await chatbotService.processMessage(
         message,
         conversationHistory,
         products,
-        userOrders
+        userOrders,
+        cartItems
       );
       
       // Update conversation history
@@ -229,11 +251,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         response: response.message,
         recommendations: enhancedRecommendations,
         actionType: response.actionType,
-        quickActions: response.quickActions || []
+        quickActions: response.quickActions || [],
+        cartItems: cartItems.length > 0 ? cartItems : undefined
       });
     } catch (error) {
       console.error("Chat error:", error);
       res.status(500).json({ message: "Failed to process chat message" });
+    }
+  });
+
+  // Chatbot checkout endpoint
+  app.post("/api/chat/checkout", async (req, res) => {
+    try {
+      const sessionId = req.headers['x-session-id'] as string;
+      console.log(`Checkout attempt for session: ${sessionId}`);
+
+      const cartItems = await storage.getCartItems(sessionId);
+      console.log(`Cart items found: ${cartItems.length}`, cartItems);
+
+      if (cartItems.length === 0) {
+        return res.status(400).json({
+          message: "Cart is empty",
+          sessionId,
+          debug: "No items found in cart for this session. Please add items to cart first."
+        });
+      }
+
+      // Calculate total
+      const total = await cartItems.reduce(async (sumPromise, item) => {
+        const sum = await sumPromise;
+        const product = await storage.getProduct(item.productId);
+        return sum + (parseFloat(product?.price || "0") * item.quantity);
+      }, Promise.resolve(0));
+
+      // Create order with default shipping address for COD
+      const orderData = insertOrderSchema.parse({
+        sessionId,
+        status: "pending",
+        total: total.toFixed(2),
+        items: cartItems,
+        shippingAddress: {
+          name: "Customer",
+          address: "To be provided",
+          city: "To be provided",
+          state: "To be provided",
+          zipCode: "To be provided",
+          phone: "To be provided"
+        },
+        paymentMethod: "cod",
+        codAmount: total.toFixed(2)
+      });
+
+      const order = await storage.createOrder(orderData);
+
+      // Clear cart after successful order
+      await storage.clearCart(sessionId);
+
+      res.json({
+        success: true,
+        order: order,
+        message: `Order #${order.id.slice(0, 8)} created successfully! You'll pay $${total.toFixed(2)} when your order arrives. We'll contact you for delivery details.`
+      });
+    } catch (error) {
+      console.error("Chatbot checkout error:", error);
+      res.status(400).json({ message: "Failed to process checkout" });
     }
   });
 

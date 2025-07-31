@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
-import { MessageSquare, Bot, User, X, Send } from "lucide-react";
+import { MessageSquare, Bot, User, X, Send, ShoppingCart } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatbotProps {
   isOpen: boolean;
@@ -31,6 +32,8 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
   const [input, setInput] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,11 +50,11 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
           message,
           conversationId
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         return data;
       } catch (error) {
@@ -63,7 +66,7 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
       if (!conversationId && data.conversationId) {
         setConversationId(data.conversationId);
       }
-      
+
       const assistantMessage: ChatMessage = {
         role: "assistant",
         content: data.response || "I'm sorry, I couldn't process that request.",
@@ -71,7 +74,7 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
         recommendations: data.recommendations || [],
         quickActions: data.quickActions || []
       };
-      
+
       setMessages(prev => [...prev, assistantMessage]);
     },
     onError: (error) => {
@@ -80,6 +83,81 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
         role: "assistant",
         content: "I apologize, but I'm having trouble right now. Please try again in a moment.",
         timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
+  });
+
+  const addToCartMutation = useMutation({
+    mutationFn: async ({ productId, size, color }: { productId: string; size: string; color: string }) => {
+      const response = await apiRequest("POST", "/api/cart", {
+        productId,
+        quantity: 1,
+        size,
+        color
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Added to cart!",
+        description: "Item has been added to your cart successfully.",
+      });
+
+      const successMessage: ChatMessage = {
+        role: "assistant",
+        content: "Great! I've added that item to your cart. Would you like to continue shopping or proceed to checkout with Cash on Delivery?",
+        timestamp: new Date(),
+        quickActions: ["Proceed with COD", "Continue Shopping", "View Cart"]
+      };
+      setMessages(prev => [...prev, successMessage]);
+    },
+    onError: (error) => {
+      console.error("Add to cart error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const checkoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/chat/checkout", {});
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      const successMessage: ChatMessage = {
+        role: "assistant",
+        content: data.message || "Your order has been placed successfully with Cash on Delivery!",
+        timestamp: new Date(),
+        quickActions: ["Track my order", "Continue Shopping"]
+      };
+      setMessages(prev => [...prev, successMessage]);
+    },
+    onError: async (error) => {
+      console.error("Checkout error:", error);
+      let errorContent = "I'm sorry, there was an issue processing your checkout. Please try again or contact support.";
+
+      // Try to get more specific error information
+      if (error.message.includes("Cart is empty")) {
+        errorContent = "It looks like your cart is empty. Please add some items to your cart first, then I can help you checkout with Cash on Delivery.";
+      }
+
+      const errorMessage: ChatMessage = {
+        role: "assistant",
+        content: errorContent,
+        timestamp: new Date(),
+        quickActions: ["Continue Shopping", "View Cart"]
       };
       setMessages(prev => [...prev, errorMessage]);
     }
@@ -100,16 +178,22 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
   };
 
   const handleQuickAction = (action: string) => {
-    if (chatMutation.isPending) return;
-    
+    if (chatMutation.isPending || checkoutMutation.isPending || addToCartMutation.isPending) return;
+
     const userMessage: ChatMessage = {
       role: "user",
       content: action,
       timestamp: new Date()
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
-    chatMutation.mutate(action);
+
+    // Handle special checkout actions
+    if (action === "Proceed with COD" || action === "Yes, checkout with COD") {
+      checkoutMutation.mutate();
+    } else {
+      chatMutation.mutate(action);
+    }
   };
 
   const quickActions = [
@@ -179,20 +263,36 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
                     <div className="mt-3 space-y-2">
                       <p className="text-xs font-medium">Recommended products:</p>
                       {message.recommendations.slice(0, 2).map((rec, i) => (
-                        <div key={i} className="flex space-x-2 p-2 bg-muted/50 rounded-lg hover:bg-muted/70 cursor-pointer transition-colors"
-                             onClick={() => rec.productId && handleQuickAction(`Show me ${rec.product?.name}`)}>
-                          {rec.product?.image && (
-                            <img 
-                              src={rec.product.image} 
-                              alt={rec.product.name}
-                              className="w-12 h-12 object-cover rounded flex-shrink-0"
-                            />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium truncate">{rec.product?.name}</p>
-                            <p className="text-xs text-success font-semibold">${rec.product?.price}</p>
-                            <p className="text-xs text-neutral mt-1">{rec.reason}</p>
+                        <div key={i} className="p-2 bg-muted/50 rounded-lg transition-colors">
+                          <div className="flex space-x-2 mb-2">
+                            {rec.product?.image && (
+                              <img
+                                src={rec.product.image}
+                                alt={rec.product.name}
+                                className="w-12 h-12 object-cover rounded flex-shrink-0"
+                              />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium truncate">{rec.product?.name}</p>
+                              <p className="text-xs text-success font-semibold">${rec.product?.price}</p>
+                              <p className="text-xs text-neutral mt-1">{rec.reason}</p>
+                            </div>
                           </div>
+                          {rec.product && (
+                            <Button
+                              size="sm"
+                              className="w-full text-xs h-6"
+                              onClick={() => addToCartMutation.mutate({
+                                productId: rec.productId,
+                                size: rec.product.sizes?.[0] || "M",
+                                color: rec.product.colors?.[0] || "Default"
+                              })}
+                              disabled={addToCartMutation.isPending}
+                            >
+                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              Add to Cart
+                            </Button>
+                          )}
                         </div>
                       ))}
                     </div>

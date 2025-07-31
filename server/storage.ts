@@ -345,14 +345,30 @@ export class MemStorage implements IStorage {
   // Order methods
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = randomUUID();
-    const order: Order = { 
-      ...insertOrder, 
-      id, 
-      createdAt: new Date(), 
-      updatedAt: new Date() 
+    const order: Order = {
+      ...insertOrder,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.orders.set(id, order);
+
+    // Simulate order progression after creation
+    this.simulateOrderProgression(id);
+
     return order;
+  }
+
+  private simulateOrderProgression(orderId: string) {
+    // Update to "processing" after 30 seconds
+    setTimeout(() => {
+      this.updateOrderStatus(orderId, "processing");
+    }, 30000);
+
+    // Update to "shipped" after 2 minutes
+    setTimeout(() => {
+      this.updateOrderStatus(orderId, "shipped");
+    }, 120000);
   }
 
   async getOrder(id: string): Promise<Order | undefined> {
