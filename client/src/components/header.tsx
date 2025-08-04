@@ -37,12 +37,47 @@ export default function Header({ onCartToggle, onChatbotToggle }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
-            <img
-              src="https://www.stickpng.com/assets/images/580b57fcd9996e24bc43c4f8.png"
-              alt="rag & bone"
+          <Link
+            href="/"
+            className="b-logo js-header-impressions flex-shrink-0"
+            title="Home page"
+          >
+            <svg
+              width="140"
+              height="40"
+              viewBox="0 0 140 40"
               className="h-10 w-auto"
-            />
+              fill="currentColor"
+            >
+              <g>
+                <text
+                  x="70"
+                  y="18"
+                  textAnchor="middle"
+                  className="text-base font-light tracking-wide"
+                  style={{
+                    fontFamily: 'Times, "Times New Roman", serif',
+                    fontSize: '16px',
+                    letterSpacing: '0.1em'
+                  }}
+                >
+                  rag & bone
+                </text>
+                <text
+                  x="70"
+                  y="32"
+                  textAnchor="middle"
+                  className="text-xs font-normal tracking-widest"
+                  style={{
+                    fontFamily: 'Arial, Helvetica, sans-serif',
+                    fontSize: '8px',
+                    letterSpacing: '0.2em'
+                  }}
+                >
+                  NEW YORK
+                </text>
+              </g>
+            </svg>
           </Link>
           
           {/* Desktop Navigation */}
