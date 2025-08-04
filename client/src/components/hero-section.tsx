@@ -42,10 +42,10 @@ export default function HeroSection({ onChatbotToggle }: HeroSectionProps) {
           >
             Shop Now
           </Button>
-          <Button 
+          <Button
             size="lg"
             variant="outline"
-            className="border-2 border-white text-white hover:bg-white hover:text-primary font-semibold text-lg px-8 py-4"
+            className="border-2 border-white bg-white/10 backdrop-blur-sm text-white hover:bg-white hover:text-primary font-semibold text-lg px-8 py-4"
             onClick={onChatbotToggle}
           >
             Chat with AI Assistant
