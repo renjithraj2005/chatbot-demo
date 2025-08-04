@@ -27,9 +27,9 @@ export default function Admin() {
   const topFAQs = [
     { question: "What's your return policy?", category: "Returns & Exchanges", count: 89 },
     { question: "How do I find my size?", category: "Sizing", count: 76 },
-    { question: "Are your jeans sustainable?", category: "Sustainability", count: 63 },
+    { question: "What is Miramar technology?", category: "Innovation", count: 63 },
     { question: "How long does shipping take?", category: "Shipping", count: 54 },
-    { question: "Do you offer alterations?", category: "Services", count: 41 }
+    { question: "Do you offer styling services?", category: "Services", count: 41 }
   ];
 
   if (analyticsLoading || conversationsLoading) {

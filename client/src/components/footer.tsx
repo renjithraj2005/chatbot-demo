@@ -7,10 +7,10 @@ export default function Footer() {
     {
       title: "Shop",
       links: [
-        { name: "Women's Jeans", href: "/?category=jeans&gender=women" },
-        { name: "Men's Jeans", href: "/?category=jeans&gender=men" },
-        { name: "Kids' Jeans", href: "/?category=jeans&gender=kids" },
-        { name: "Jackets", href: "/?category=jackets" },
+        { name: "Women's Fashion", href: "/?gender=women" },
+        { name: "Men's Fashion", href: "/?gender=men" },
+        { name: "Miramar Collection", href: "/?collection=miramar" },
+        { name: "Denim", href: "/?category=jeans" },
         { name: "Sale", href: "/?sale=true" },
       ]
     },
@@ -28,7 +28,7 @@ export default function Footer() {
       title: "About",
       links: [
         { name: "Our Story", href: "/story" },
-        { name: "Sustainability", href: "/sustainability" },
+        { name: "Quality Guaranteed", href: "/quality" },
         { name: "Careers", href: "/careers" },
         { name: "Press", href: "/press" },
         { name: "Admin", href: "/admin" },
@@ -41,10 +41,10 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">DL1961</h3>
+            <h3 className="text-xl font-bold mb-4">rag & bone</h3>
             <p className="text-gray-300 mb-4 text-sm leading-relaxed">
-              Premium sustainable denim crafted with care for people and planet. 
-              Every jean tells a story of innovation and responsibility.
+              Modern fashion and contemporary clothing crafted with innovation and style.
+              Every piece tells a story of urban sophistication and quality.
             </p>
             <div className="flex space-x-4">
               <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white hover:bg-white/10">
@@ -78,7 +78,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-300 text-sm">© 2024 DL1961. All rights reserved.</p>
+          <p className="text-gray-300 text-sm">© 2024 rag & bone. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link href="/privacy">
               <span className="text-gray-300 hover:text-white transition-colors text-sm cursor-pointer">

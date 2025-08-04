@@ -25,9 +25,9 @@ export default function Header({ onCartToggle, onChatbotToggle }: HeaderProps) {
   });
 
   const navigationItems = [
-    { name: "Women", href: "/?category=jeans&gender=women" },
-    { name: "Men", href: "/?category=jeans&gender=men" },
-    { name: "Kids", href: "/?category=kids&gender=kids" },
+    { name: "Women", href: "/?gender=women" },
+    { name: "Men", href: "/?gender=men" },
+    { name: "Denim", href: "/?category=jeans" },
     { name: "Miramar", href: "/?collection=miramar" },
     { name: "Sale", href: "/?sale=true" },
   ];
@@ -38,10 +38,11 @@ export default function Header({ onCartToggle, onChatbotToggle }: HeaderProps) {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            <div>
-              <h1 className="text-2xl font-bold text-primary">rag & bone</h1>
-              <p className="text-xs text-neutral -mt-1">Modern Fashion</p>
-            </div>
+            <img
+              src="https://www.stickpng.com/assets/images/580b57fcd9996e24bc43c4f8.png"
+              alt="rag & bone"
+              className="h-10 w-auto"
+            />
           </Link>
           
           {/* Desktop Navigation */}

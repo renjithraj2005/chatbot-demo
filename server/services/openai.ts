@@ -78,9 +78,31 @@ RETURNS & EXCHANGES:
 SERVICES:
 - Quality Guaranteed program for product durability
 - Styling Services: Expert stylists create customized looks
-- Denim Recycling program available
 - In-store pickup and returns available
 - Live chat support available
+
+CUSTOMER SERVICE CONTACT:
+- Email: help@rag-bone.com
+- Phone: +1-844-RAG-BONE (1-844-724-2663)
+- Live chat: 9am-6pm EST, Monday-Friday
+- International support: int-help@rag-bone.com
+
+ORDER MANAGEMENT:
+- Orders before 3pm ET ship same business day
+- Orders after 3pm ET ship next business day
+- In-store pickup ready in 3 business hours
+- Cannot cancel or change orders once placed
+- Pre-orders charged and shipped when available
+- Price match within 30 days (excluding Final Sale items)
+- Order tracking via email confirmation with tracking info
+- Orders over $1500 require signature on delivery
+
+GIFT CARDS:
+- Electronic gift cards available
+- Valid only in the US
+- Delivered to recipient's email address
+- Non-refundable
+- Can be used online and in-store
 
 PAYMENT & PRICING:
 - Standard payment methods accepted
@@ -128,7 +150,6 @@ Use actionType: "faq" for questions about:
 - In-store pickup and returns
 - Quality Guaranteed program
 - Styling services and expert consultations
-- Denim recycling program
 - Signature technologies: Miramar, Featherweight, rbAIRFLEX
 - Collections: Harvey, Zuma, rbBAGGY
 - Store locations and in-person assistance
@@ -213,7 +234,7 @@ Respond with JSON in this format:
       const result = JSON.parse(response.choices[0].message.content || '{}');
       
       return {
-        message: result.message || "I'm here to help with your DL1961 shopping needs!",
+        message: result.message || "I'm here to help with your rag & bone shopping needs!",
         actionType: result.actionType || "general",
         recommendations: result.recommendations || [],
         quickActions: result.quickActions || []
@@ -247,7 +268,7 @@ Respond with JSON in this format:
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are a product recommendation engine for DL1961 denim." },
+          { role: "system", content: "You are a product recommendation engine for rag & bone contemporary fashion." },
           { role: "user", content: prompt }
         ],
         response_format: { type: "json_object" },

@@ -332,7 +332,7 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
               <Bot className="h-4 w-4 text-white" />
             </div>
             <div>
-              <h4 className="font-semibold">DL1961 Assistant</h4>
+              <h4 className="font-semibold">rag & bone Assistant</h4>
               <p className="text-xs text-gray-300">Always here to help</p>
             </div>
           </div>

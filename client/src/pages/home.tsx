@@ -1,7 +1,7 @@
 import Header from "@/components/header";
 import HeroSection from "@/components/hero-section";
 import FeaturedProducts from "@/components/featured-products";
-import SustainabilitySection from "@/components/sustainability-section";
+import InnovationSection from "@/components/innovation-section";
 import Footer from "@/components/footer";
 import Chatbot from "@/components/chatbot";
 import ProductModal from "@/components/product-modal";
@@ -22,7 +22,7 @@ export default function Home() {
       />
       <HeroSection onChatbotToggle={() => setIsChatbotOpen(!isChatbotOpen)} />
       <FeaturedProducts onProductSelect={setSelectedProduct} />
-      <SustainabilitySection />
+      <InnovationSection />
       <Footer />
       
       <Chatbot 

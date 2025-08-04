@@ -1,6 +1,6 @@
 import { Sparkles, Award, Users } from "lucide-react";
 
-export default function SustainabilitySection() {
+export default function InnovationSection() {
   const features = [
     {
       icon: Sparkles,

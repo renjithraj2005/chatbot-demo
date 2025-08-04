@@ -1,6 +1,6 @@
-# DL1961 DenimBot - AI-Powered E-commerce Application
+# rag & bone E-commerce - AI-Powered Shopping Experience
 
-A modern full-stack e-commerce application for DL1961, featuring an AI-powered shopping assistant, product catalog management, and comprehensive shopping experience.
+A modern full-stack e-commerce application for rag & bone, featuring an AI-powered shopping assistant, product catalog management, and comprehensive shopping experience.
 
 ## 🚀 Quick Start
 
@@ -79,7 +79,7 @@ DenimBot/
 - **Product Recommendations**: AI-powered suggestions based on user preferences
 - **Order Assistance**: Help with order tracking and status
 - **Size Guide**: Intelligent sizing recommendations
-- **Brand Knowledge**: Deep understanding of DL1961 products and sustainability
+- **Brand Knowledge**: Deep understanding of rag & bone products and modern fashion
 - **Conversation Memory**: Maintains context throughout the session
 
 ### OpenAI Integration
@@ -93,7 +93,7 @@ DenimBot/
 ### Product Catalog
 - Browse by category (Jeans, Jackets, Casual Wear)
 - Filter by gender (Men, Women, Kids)
-- Detailed product information with authentic DL1961 data
+- Detailed product information with authentic rag & bone data
 - Real pricing and product descriptions
 
 ### Shopping Cart

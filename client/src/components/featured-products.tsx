@@ -3,29 +3,86 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { Product } from "@shared/schema";
+import { useLocation } from "wouter";
 
 interface FeaturedProductsProps {
   onProductSelect: (product: Product) => void;
 }
 
 export default function FeaturedProducts({ onProductSelect }: FeaturedProductsProps) {
+  const [location] = useLocation();
+
+  // Parse URL parameters
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const category = urlParams.get('category');
+  const gender = urlParams.get('gender');
+  const collection = urlParams.get('collection');
+  const sale = urlParams.get('sale');
+
+  // Build query parameters
+  const queryParams = new URLSearchParams();
+  if (category) queryParams.set('category', category);
+  if (gender) queryParams.set('gender', gender);
+
   const { data: products, isLoading } = useQuery({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/products", category, gender],
+    queryFn: async () => {
+      const response = await fetch(`/api/products?${queryParams.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch products');
+      return response.json();
+    }
   });
 
-  const featuredProducts = products?.slice(0, 6) || [];
+  let featuredProducts = products || [];
+
+  // Additional filtering for collection and sale (not handled by backend)
+  if (collection === 'miramar') {
+    featuredProducts = featuredProducts.filter((product: Product) =>
+      product.name.toLowerCase().includes('miramar') ||
+      product.features?.some(f => f.toLowerCase().includes('miramar'))
+    );
+  }
+
+  if (sale === 'true') {
+    // For demo purposes, show products with certain keywords as "sale" items
+    featuredProducts = featuredProducts.filter((product: Product) =>
+      product.name.toLowerCase().includes('sale') ||
+      parseFloat(product.price) < 200
+    );
+  }
+
+  // Dynamic title based on filters
+  const getTitle = () => {
+    if (collection === 'miramar') return 'Miramar Collection';
+    if (sale === 'true') return 'Sale Items';
+    if (gender === 'women') return "Women's Fashion";
+    if (gender === 'men') return "Men's Fashion";
+    if (gender === 'kids') return "Kids' Fashion";
+    if (category === 'jeans') return 'Denim Collection';
+    return 'Featured Collections';
+  };
+
+  const getDescription = () => {
+    if (collection === 'miramar') return 'Revolutionary printing technique that makes any material look like denim';
+    if (sale === 'true') return 'Discover amazing deals on contemporary fashion';
+    if (gender === 'women') return 'Discover our contemporary women\'s fashion collection';
+    if (gender === 'men') return 'Explore our modern men\'s fashion line';
+    if (gender === 'kids') return 'Stylish fashion for the next generation';
+    if (category === 'jeans') return 'Premium denim with innovative technology';
+    return 'Discover our most popular contemporary fashion pieces';
+  };
 
   if (isLoading) {
     return (
       <section id="featured-products" className="py-16 bg-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-primary mb-4">Featured Collections</h3>
-            <p className="text-neutral text-lg">Discover our most popular sustainable denim pieces</p>
+            <h3 className="text-3xl font-bold text-primary mb-4">{getTitle()}</h3>
+            <p className="text-neutral text-lg">{getDescription()}</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
               <Card key={i} className="overflow-hidden">
                 <div className="aspect-w-3 aspect-h-4 bg-gray-200 animate-pulse">
                   <div className="w-full h-96 bg-gray-300"></div>
@@ -47,11 +104,11 @@ export default function FeaturedProducts({ onProductSelect }: FeaturedProductsPr
     <section id="featured-products" className="py-16 bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h3 className="text-3xl font-bold text-primary mb-4">Featured Collections</h3>
-          <p className="text-neutral text-lg">Discover our most popular sustainable denim pieces</p>
+          <h3 className="text-3xl font-bold text-primary mb-4">{getTitle()}</h3>
+          <p className="text-neutral text-lg">{getDescription()}</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {featuredProducts.map((product: Product) => (
             <Card 
               key={product.id} 
