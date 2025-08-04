@@ -27,8 +27,8 @@ export default function Header({ onCartToggle, onChatbotToggle }: HeaderProps) {
   const navigationItems = [
     { name: "Women", href: "/?category=jeans&gender=women" },
     { name: "Men", href: "/?category=jeans&gender=men" },
-    { name: "Kids", href: "/?category=jeans&gender=kids" },
-    { name: "Sustainability", href: "/?section=sustainability" },
+    { name: "Kids", href: "/?category=kids&gender=kids" },
+    { name: "Miramar", href: "/?collection=miramar" },
     { name: "Sale", href: "/?sale=true" },
   ];
 
@@ -39,8 +39,8 @@ export default function Header({ onCartToggle, onChatbotToggle }: HeaderProps) {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <div>
-              <h1 className="text-2xl font-bold text-primary">DL1961</h1>
-              <p className="text-xs text-neutral -mt-1">Sustainable Denim</p>
+              <h1 className="text-2xl font-bold text-primary">rag & bone</h1>
+              <p className="text-xs text-neutral -mt-1">Modern Fashion</p>
             </div>
           </Link>
           
@@ -102,8 +102,8 @@ export default function Header({ onCartToggle, onChatbotToggle }: HeaderProps) {
                 <div className="flex flex-col space-y-6 mt-6">
                   <Link href="/" onClick={() => setMobileMenuOpen(false)}>
                     <div>
-                      <h2 className="text-xl font-bold text-primary">DL1961</h2>
-                      <p className="text-xs text-neutral">Sustainable Denim</p>
+                      <h2 className="text-xl font-bold text-primary">rag & bone</h2>
+                      <p className="text-xs text-neutral">Modern Fashion</p>
                     </div>
                   </Link>
                   

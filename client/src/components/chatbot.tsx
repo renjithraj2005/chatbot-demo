@@ -28,7 +28,7 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "Hi! I'm your DL1961 shopping assistant. I can help you find the perfect jeans, track orders, or answer any questions. What are you looking for today?",
+      content: "Hi! I'm your rag & bone shopping assistant. I can help you find the perfect modern fashion pieces, track orders, or answer any questions about our collections. What are you looking for today?",
       timestamp: new Date()
     }
   ]);
@@ -96,8 +96,6 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
 
     return () => clearInterval(interval);
   }, [messages, userHasScrolled]);
-
-  // Smart auto-scroll: only scroll to bottom for new messages, not during typing
 
   // Check if user has manually scrolled up
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {

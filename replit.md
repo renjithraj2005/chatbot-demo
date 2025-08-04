@@ -1,8 +1,8 @@
-# DL1961 E-commerce Application
+# rag & bone E-commerce Application
 
 ## Overview
 
-This is a modern full-stack e-commerce application for DL1961, a premium sustainable denim brand. The application features an AI-powered shopping assistant, product catalog management, shopping cart functionality, and an admin dashboard. Built with React, TypeScript, Express.js, and Drizzle ORM with PostgreSQL database support.
+This is a modern full-stack e-commerce application for rag & bone, a premium contemporary fashion brand. The application features an AI-powered shopping assistant, product catalog management, shopping cart functionality, and an admin dashboard. Built with React, TypeScript, Express.js, and Drizzle ORM with PostgreSQL database support.
 
 ## User Preferences
 

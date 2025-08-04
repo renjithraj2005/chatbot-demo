@@ -1,21 +1,21 @@
-import { Leaf, Recycle, Factory } from "lucide-react";
+import { Sparkles, Award, Users } from "lucide-react";
 
 export default function SustainabilitySection() {
   const features = [
     {
-      icon: Leaf,
-      title: "89% Less Water",
-      description: "Innovative washing techniques reduce water consumption"
+      icon: Sparkles,
+      title: "Miramar Technology",
+      description: "Revolutionary printing technique that transforms any material"
     },
     {
-      icon: Recycle,
-      title: "Recycled Fibers",
-      description: "Incorporating post-consumer recycled materials"
+      icon: Award,
+      title: "Quality Guaranteed",
+      description: "Built to last with premium materials and construction"
     },
     {
-      icon: Factory,
-      title: "Vertical Integration",
-      description: "Complete supply chain control for transparency"
+      icon: Users,
+      title: "Expert Styling",
+      description: "Personal stylists create customized looks for you"
     }
   ];
 
@@ -24,11 +24,11 @@ export default function SustainabilitySection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h3 className="text-4xl font-bold text-primary mb-6">Sustainable by Design</h3>
+            <h3 className="text-4xl font-bold text-primary mb-6">Innovation by Design</h3>
             <p className="text-lg text-neutral mb-8 leading-relaxed">
-              Every DL1961 jean is crafted with our proprietary fiber-to-finish process, 
-              using 89% less water and reducing environmental impact by 60% compared to 
-              traditional denim manufacturing.
+              Every rag & bone piece is crafted with innovative techniques and premium materials,
+              featuring our revolutionary Miramar technology and commitment to quality that
+              defines modern urban fashion.
             </p>
             
             <div className="space-y-6">
@@ -49,26 +49,26 @@ export default function SustainabilitySection() {
             </div>
             
             <div className="mt-8 p-6 bg-accent/10 rounded-lg border-l-4 border-accent">
-              <h5 className="font-semibold text-primary mb-2">Our Commitment</h5>
+              <h5 className="font-semibold text-primary mb-2">Our Promise</h5>
               <p className="text-neutral text-sm">
-                We're committed to creating the world's most sustainable denim while 
-                maintaining the highest standards of quality and style. Every pair tells 
-                a story of innovation and responsibility.
+                We're committed to creating modern fashion that defines urban style while
+                maintaining the highest standards of quality and craftsmanship. Every piece tells
+                a story of innovation and contemporary design.
               </p>
             </div>
           </div>
           
           <div className="relative">
-            <img 
-              src="https://images.unsplash.com/photo-1586105251261-72a756497a11?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
-              alt="Sustainable denim manufacturing process" 
+            <img
+              src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
+              alt="Modern fashion design process"
               className="rounded-xl shadow-lg w-full h-auto"
             />
             <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg">
               <div className="text-center">
-                <div className="text-2xl font-bold text-accent">60%</div>
+                <div className="text-2xl font-bold text-accent">75+</div>
                 <div className="text-xs text-neutral uppercase tracking-wide">
-                  Less Environmental Impact
+                  Countries Worldwide
                 </div>
               </div>
             </div>
