@@ -3,10 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import { apiRequest } from "@/lib/queryClient";
 import { MessageSquare, Bot, User, X, Send, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 
 interface ChatbotProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ interface ChatMessage {
   timestamp: Date;
   recommendations?: any[];
   quickActions?: string[];
+  isTyping?: boolean;
+  displayedContent?: string;
 }
 
 export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
@@ -35,13 +38,108 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  // Smart auto-scroll state
+  const [userHasScrolled, setUserHasScrolled] = useState(false);
+  const [lastMessageCount, setLastMessageCount] = useState(0);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const isScrollingProgrammatically = useRef(false);
+
+  // Typing effect for AI messages
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMessages(prevMessages => {
+        let shouldScroll = false;
+        const updatedMessages = prevMessages.map(message => {
+          if (message.role === 'assistant' && message.isTyping && message.displayedContent !== undefined) {
+            const fullContent = message.content;
+            const currentDisplayed = message.displayedContent;
+
+            if (currentDisplayed.length < fullContent.length) {
+              // Add 1-3 characters at a time for more natural typing
+              const charsToAdd = Math.min(
+                Math.floor(Math.random() * 3) + 1,
+                fullContent.length - currentDisplayed.length
+              );
+
+              shouldScroll = true; // Content is being added, should scroll
+
+              return {
+                ...message,
+                displayedContent: fullContent.slice(0, currentDisplayed.length + charsToAdd)
+              };
+            } else {
+              // Typing complete
+              return {
+                ...message,
+                isTyping: false,
+                displayedContent: fullContent
+              };
+            }
+          }
+          return message;
+        });
+
+        // Scroll to bottom during typing if user hasn't manually scrolled up
+        if (shouldScroll && !userHasScrolled) {
+          setTimeout(() => {
+            isScrollingProgrammatically.current = true;
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            setTimeout(() => {
+              isScrollingProgrammatically.current = false;
+            }, 100);
+          }, 10);
+        }
+
+        return updatedMessages;
+      });
+    }, 30); // Adjust speed here (lower = faster)
+
+    return () => clearInterval(interval);
+  }, [messages, userHasScrolled]);
+
+  // Smart auto-scroll: only scroll to bottom for new messages, not during typing
+
+  // Check if user has manually scrolled up
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    // Don't treat programmatic scrolling as user scrolling
+    if (isScrollingProgrammatically.current) {
+      return;
+    }
+
+    const container = e.currentTarget;
+    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+
+    // Only set userHasScrolled to true if they're clearly not at the bottom
+    if (!isAtBottom) {
+      setUserHasScrolled(true);
+    } else {
+      setUserHasScrolled(false);
+    }
   };
 
+  const scrollToBottom = () => {
+    isScrollingProgrammatically.current = true;
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+
+    // Reset the flag after scroll completes
+    setTimeout(() => {
+      isScrollingProgrammatically.current = false;
+    }, 500);
+  };
+
+  // Only auto-scroll when there's a new message and user hasn't manually scrolled up
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const currentMessageCount = messages.length;
+
+    // New message added
+    if (currentMessageCount > lastMessageCount) {
+      // Only auto-scroll if user hasn't manually scrolled up
+      if (!userHasScrolled) {
+        scrollToBottom();
+      }
+      setLastMessageCount(currentMessageCount);
+    }
+  }, [messages, userHasScrolled, lastMessageCount]);
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
@@ -72,7 +170,9 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
         content: data.response || "I'm sorry, I couldn't process that request.",
         timestamp: new Date(),
         recommendations: data.recommendations || [],
-        quickActions: data.quickActions || []
+        quickActions: data.quickActions || [],
+        isTyping: true,
+        displayedContent: ""
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -82,7 +182,9 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
       const errorMessage: ChatMessage = {
         role: "assistant",
         content: "I apologize, but I'm having trouble right now. Please try again in a moment.",
-        timestamp: new Date()
+        timestamp: new Date(),
+        isTyping: true,
+        displayedContent: ""
       };
       setMessages(prev => [...prev, errorMessage]);
     }
@@ -101,7 +203,7 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
       }
       return response.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       toast({
         title: "Added to cart!",
@@ -112,7 +214,9 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
         role: "assistant",
         content: "Great! I've added that item to your cart. Would you like to continue shopping or proceed to checkout with Cash on Delivery?",
         timestamp: new Date(),
-        quickActions: ["Proceed with COD", "Continue Shopping", "View Cart"]
+        quickActions: ["Proceed with COD", "Continue Shopping", "View Cart"],
+        isTyping: true,
+        displayedContent: ""
       };
       setMessages(prev => [...prev, successMessage]);
     },
@@ -140,7 +244,9 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
         role: "assistant",
         content: data.message || "Your order has been placed successfully with Cash on Delivery!",
         timestamp: new Date(),
-        quickActions: ["Track my order", "Continue Shopping"]
+        quickActions: ["Track my order", "Continue Shopping"],
+        isTyping: true,
+        displayedContent: ""
       };
       setMessages(prev => [...prev, successMessage]);
     },
@@ -157,7 +263,9 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
         role: "assistant",
         content: errorContent,
         timestamp: new Date(),
-        quickActions: ["Continue Shopping", "View Cart"]
+        quickActions: ["Continue Shopping", "View Cart"],
+        isTyping: true,
+        displayedContent: ""
       };
       setMessages(prev => [...prev, errorMessage]);
     }
@@ -242,7 +350,11 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
         
         <CardContent className="flex-1 flex flex-col p-0 min-h-0">
           {/* Messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 min-h-0 chatbot-scroll">
+          <div
+            ref={messagesContainerRef}
+            className="flex-1 p-4 overflow-y-auto space-y-3 min-h-0 chatbot-scroll"
+            onScroll={handleScroll}
+          >
             {messages.map((message, index) => (
               <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'items-start'}`}>
                 {message.role === 'assistant' && (
@@ -252,14 +364,33 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
                 )}
                 
                 <div className={`max-w-xs ${
-                  message.role === 'user' 
-                    ? 'bg-primary text-white' 
+                  message.role === 'user'
+                    ? 'bg-primary text-white'
                     : 'bg-secondary'
                 } rounded-lg p-3`}>
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  {message.role === 'user' ? (
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  ) : (
+                    <div className="text-sm prose prose-sm max-w-none prose-headings:text-sm prose-p:text-sm prose-li:text-sm prose-strong:text-sm">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                          ul: ({ children }) => <ul className="mb-2 last:mb-0 ml-4 list-disc">{children}</ul>,
+                          li: ({ children }) => <li className="mb-1">{children}</li>,
+                          strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                          em: ({ children }) => <em className="italic">{children}</em>,
+                        }}
+                      >
+                        {message.displayedContent !== undefined ? message.displayedContent : message.content}
+                      </ReactMarkdown>
+                      {message.isTyping && (
+                        <span className="inline-block w-2 h-4 bg-current opacity-75 animate-pulse ml-1">|</span>
+                      )}
+                    </div>
+                  )}
                   
-                  {/* Show recommendations if available */}
-                  {message.recommendations && message.recommendations.length > 0 && (
+                  {/* Show recommendations if available and typing is complete */}
+                  {message.recommendations && message.recommendations.length > 0 && !message.isTyping && (
                     <div className="mt-3 space-y-2">
                       <p className="text-xs font-medium">Recommended products:</p>
                       {message.recommendations.slice(0, 2).map((rec, i) => (
@@ -301,8 +432,8 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
                     </div>
                   )}
                   
-                  {/* Show quick actions if available */}
-                  {message.quickActions && message.quickActions.length > 0 && (
+                  {/* Show quick actions if available and typing is complete */}
+                  {message.quickActions && message.quickActions.length > 0 && !message.isTyping && (
                     <div className="mt-2 space-y-1">
                       {message.quickActions.slice(0, 2).map((action, i) => (
                         <Button
@@ -343,6 +474,23 @@ export default function Chatbot({ isOpen, onToggle }: ChatbotProps) {
               </div>
             )}
             
+            {/* Scroll to bottom button */}
+            {userHasScrolled && (
+              <div className="sticky bottom-2 flex justify-center">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="rounded-full shadow-lg text-xs px-3 py-1 h-7"
+                  onClick={() => {
+                    setUserHasScrolled(false);
+                    scrollToBottom();
+                  }}
+                >
+                  ↓ New messages
+                </Button>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
           
